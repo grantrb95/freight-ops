@@ -1,0 +1,174 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments and secrets
+.env
+.env.local
+.env.*.local
+*.env
+config/secrets.yaml
+config/*.secret.yaml
+secrets/
+credentials/
+*.key
+*.pem
+*.crt
+*.p12
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+db.sqlite3
+migrations/versions/*.pyc
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Project specific
+data/raw/
+data/processed/
+data/cache/
+logs/
+*.log
+tmp/
+temp/
+
+# API keys and sensitive data
+*apikey*
+*api_key*
+*api-key*
+*secret*
+*password*
+*credentials*
+
+# Load board specific
+dat_cache/
+truckstop_cache/
+load_history/
+rate_history/
+
+# Financial data
+settlements/
+invoices/
+receipts/
+
+# MCP server data
+mcp_servers/*/data/
+mcp_servers/*/cache/
+mcp_servers/*/.env
+
+# Notebooks output
+notebooks/*.html
+notebooks/*.pdf
+notebooks/exports/
+
+# OS specific
+Thumbs.db
+Desktop.ini
+.Spotlight-V100
+.Trashes
+
+# Backup files
+*.bak
+*.backup
+*.old
+*_backup
+
+# uv specific
+.uv/
+uv.lock
+
+# Ruff
+.ruff_cache/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Coverage
+.coverage
+htmlcov/
+
+# Distribution / packaging
+pip-wheel-metadata/

@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "LLM Configuration for Freight Operations Platform",
+  "description": "Defines which LLM models to use for each agent and task type",
+
+  "providers": {
+    "anthropic": {
+      "name": "Anthropic",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "base_url": "https://api.anthropic.com",
+      "models": {
+        "claude-3-5-sonnet-20241022": {
+          "name": "Claude 3.5 Sonnet",
+          "context_window": 200000,
+          "max_output": 8192,
+          "cost_per_1k_input": 0.003,
+          "cost_per_1k_output": 0.015,
+          "strengths": ["analysis", "reasoning", "structured_output", "code"],
+          "recommended_for": ["rate_analysis", "compliance", "route_optimization"]
+        },
+        "claude-3-5-haiku-20241022": {
+          "name": "Claude 3.5 Haiku",
+          "context_window": 200000,
+          "max_output": 8192,
+          "cost_per_1k_input": 0.001,
+          "cost_per_1k_output": 0.005,
+          "strengths": ["speed", "efficiency", "simple_tasks"],
+          "recommended_for": ["quick_queries", "data_extraction", "monitoring"]
+        },
+        "claude-3-opus-20240229": {
+          "name": "Claude 3 Opus",
+          "context_window": 200000,
+          "max_output": 4096,
+          "cost_per_1k_input": 0.015,
+          "cost_per_1k_output": 0.075,
+          "strengths": ["complex_reasoning", "accuracy", "multi_step"],
+          "recommended_for": ["complex_dispatch", "strategic_planning"]
+        }
+      }
+    },
+
+    "openai": {
+      "name": "OpenAI",
+      "api_key_env": "OPENAI_API_KEY",
+      "base_url": "https://api.openai.com/v1",
+      "models": {
+        "gpt-4-turbo-preview": {
+          "name": "GPT-4 Turbo",
+          "context_window": 128000,
+          "max_output": 4096,
+          "cost_per_1k_input": 0.01,
+          "cost_per_1k_output": 0.03,
+          "strengths": ["general_purpose", "function_calling", "creative"],
+          "recommended_for": ["dispatch", "general_queries"]
+        },
+        "gpt-4o": {
+          "name": "GPT-4o",
+          "context_window": 128000,
+          "max_output": 16384,
+          "cost_per_1k_input": 0.0025,
+          "cost_per_1k_output": 0.01,
+          "strengths": ["multimodal", "speed", "cost_effective"],
+          "recommended_for": ["document_processing", "quick_analysis"]
+        },
+        "gpt-3.5-turbo": {
+          "name": "GPT-3.5 Turbo",
+          "context_window": 16385,
+          "max_output": 4096,
+          "cost_per_1k_input": 0.0005,
+          "cost_per_1k_output": 0.0015,
+          "strengths": ["speed", "low_cost", "simple_tasks"],
+          "recommended_for": ["monitoring", "simple_queries", "notifications"]
+        }
+      }
+    }
+  },
+
+  "agent_assignments": {
+    "dispatch": {
+      "primary_model": {
+        "provider": "anthropic",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.2,
+        "max_tokens": 4096
+      },
+      "fallback_model": {
+        "provider": "openai",
+        "model": "gpt-4-turbo-preview",
+        "temperature": 0.2,
+        "max_tokens": 4096
+      },
+      "reasoning": "Dispatch requires strong analytical reasoning to evaluate multiple loads, consider deadhead, calculate profitability, and make optimal booking decisions. Claude Sonnet excels at this type of structured analysis.",
+      "system_prompt_template": "You are a freight dispatch AI assistant specializing in hotshot trucking. Your role is to analyze available loads from load boards, calculate profitability including deadhead costs, and recommend the most profitable loads. Always consider rate per mile, deadhead percentage, total trip profitability, and strategic positioning for future loads.",
+      "tools_enabled": [
+        "dat_load_board",
+        "truckstop_load_board",
+        "google_maps_routing",
+        "fuel_price_lookup",
+        "rate_calculator"
+      ]
+    },
+
+    "rate_analysis": {
+      "primary_model": {
+        "provider": "anthropic",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.1,
+        "max_tokens": 8192
+      },
+      "fallback_model": {
+        "provider": "openai",
+        "model": "gpt-4o",
+        "temperature": 0.1,
+        "max_tokens": 4096
+      },
+      "reasoning": "Rate analysis requires precise numerical calculations, historical data analysis, and market trend identification. Claude's strength in structured reasoning and accuracy makes it ideal for this critical financial task.",
+      "system_prompt_template": "You are a freight rate analysis expert. Your role is to analyze historical rate data, identify market trends, calculate optimal pricing, and provide recommendations for rate negotiations. Focus on accuracy and data-driven insights.",
+      "tools_enabled": [
+        "dat_rateview",
+        "historical_rate_database",
+        "market_analysis",
+        "fuel_cost_calculator"
+      ]
+    },
+
+    "compliance": {
+      "primary_model": {
+        "provider": "anthropic",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.0,
+        "max_tokens": 4096
+      },
+      "fallback_model": {
+        "provider": "openai",
+        "model": "gpt-4-turbo-preview",
+        "temperature": 0.0,
+        "max_tokens": 4096
+      },
+      "reasoning": "Compliance requires absolute accuracy and attention to detail. Temperature is set to 0 for maximum determinism. Claude excels at understanding complex regulations and applying them correctly.",
+      "system_prompt_template": "You are a DOT compliance and IFTA specialist. Your role is to ensure all operations comply with FMCSA regulations, track IFTA requirements, monitor HOS compliance, and generate accurate regulatory reports. Accuracy is critical.",
+      "tools_enabled": [
+        "ifta_calculator",
+        "hos_tracker",
+        "fmcsa_lookup",
+        "compliance_database"
+      ]
+    },
+
+    "route_optimizer": {
+      "primary_model": {
+        "provider": "anthropic",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.3,
+        "max_tokens": 4096
+      },
+      "fallback_model": {
+        "provider": "openai",
+        "model": "gpt-4o",
+        "temperature": 0.3,
+        "max_tokens": 4096
+      },
+      "reasoning": "Route optimization requires balancing multiple factors: fuel efficiency, time, tolls, traffic, and backhaul opportunities. Slightly higher temperature allows for creative routing solutions.",
+      "system_prompt_template": "You are a route optimization specialist for hotshot trucking. Your role is to find the most efficient routes considering fuel costs, time, traffic, tolls, and backhaul opportunities. Minimize deadhead and maximize profitability.",
+      "tools_enabled": [
+        "google_maps_routing",
+        "traffic_data",
+        "fuel_price_lookup",
+        "toll_calculator",
+        "weather_data"
+      ]
+    },
+
+    "settlement": {
+      "primary_model": {
+        "provider": "anthropic",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.0,
+        "max_tokens": 4096
+      },
+      "fallback_model": {
+        "provider": "openai",
+        "model": "gpt-4-turbo-preview",
+        "temperature": 0.0,
+        "max_tokens": 4096
+      },
+      "reasoning": "Driver settlements involve precise financial calculations and must be 100% accurate. Zero temperature ensures deterministic outputs for financial data.",
+      "system_prompt_template": "You are a driver settlement specialist. Calculate driver pay accurately based on contractual terms, deduct expenses and advances, track reimbursements, and generate detailed settlement reports. Accuracy is paramount.",
+      "tools_enabled": [
+        "accounting_system",
+        "expense_tracker",
+        "contract_database",
+        "payment_processor"
+      ]
+    },
+
+    "monitoring": {
+      "primary_model": {
+        "provider": "anthropic",
+        "model": "claude-3-5-haiku-20241022",
+        "temperature": 0.2,
+        "max_tokens": 1024
+      },
+      "fallback_model": {
+        "provider": "openai",
+        "model": "gpt-3.5-turbo",
+        "temperature": 0.2,
+        "max_tokens": 1024
+      },
+      "reasoning": "Monitoring tasks are frequent but simple. Using efficient, low-cost models (Haiku or GPT-3.5) for continuous monitoring keeps costs down while maintaining reliability.",
+      "system_prompt_template": "You monitor freight operations and alert on important events. Watch for HOS violations, compliance issues, high-value loads, and system anomalies.",
+      "tools_enabled": [
+        "alert_system",
+        "notification_service",
+        "system_monitor"
+      ]
+    },
+
+    "general_query": {
+      "primary_model": {
+        "provider": "anthropic",
+        "model": "claude-3-5-haiku-20241022",
+        "temperature": 0.5,
+        "max_tokens": 2048
+      },
+      "fallback_model": {
+        "provider": "openai",
+        "model": "gpt-3.5-turbo",
+        "temperature": 0.5,
+        "max_tokens": 2048
+      },
+      "reasoning": "General queries and user interactions can use faster, cheaper models for better user experience and cost efficiency.",
+      "system_prompt_template": "You are a helpful assistant for freight operations. Answer questions about loads, rates, compliance, and operations clearly and concisely.",
+      "tools_enabled": []
+    }
+  },
+
+  "defaults": {
+    "provider": "anthropic",
+    "model": "claude-3-5-sonnet-20241022",
+    "temperature": 0.2,
+    "max_tokens": 4096,
+    "timeout_seconds": 60,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 2
+  },
+
+  "cost_optimization": {
+    "cache_identical_requests": true,
+    "cache_ttl_seconds": 3600,
+    "use_cheaper_models_for_simple_tasks": true,
+    "max_monthly_spend_usd": 1000,
+    "alert_threshold_percentage": 80
+  },
+
+  "response_validation": {
+    "require_structured_output": true,
+    "validate_json_schema": true,
+    "log_all_requests": true,
+    "log_all_responses": true
+  }
+}

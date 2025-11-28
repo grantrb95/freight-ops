@@ -1,0 +1,360 @@
+# ============================================================================
+# Freight Operations Platform - Main Configuration
+# ============================================================================
+
+# Company Information
+company:
+  name: "Your Hotshot Trucking Company"
+  dot_number: "1234567"
+  mc_number: "MC123456"
+
+  # Home base for deadhead calculations
+  home_base:
+    city: "Dallas"
+    state: "TX"
+    zip_code: "75001"
+    latitude: 32.7767
+    longitude: -96.7970
+
+# ============================================================================
+# Rate Configuration
+# ============================================================================
+
+rates:
+  # Minimum acceptable rates (USD)
+  minimum:
+    rate_per_mile: 2.00        # Minimum RPM for loaded miles
+    total_load_value: 500.00   # Minimum gross revenue per load
+    hourly_equivalent: 75.00   # Minimum hourly rate equivalent
+
+  # Target rates for profitability
+  target:
+    rate_per_mile: 2.50
+    profit_margin: 0.30        # 30% profit margin target
+
+  # Fuel surcharge calculation
+  fuel_surcharge:
+    enabled: true
+    base_fuel_price: 3.50      # Base fuel price (no surcharge)
+    rate_per_dollar: 0.06      # $0.06/mile per $1 over base
+    max_surcharge: 0.50        # Maximum surcharge per mile
+
+  # Rate adjustments by load characteristics
+  adjustments:
+    expedited_multiplier: 1.25  # 25% premium for expedited
+    hazmat_premium: 0.30        # $0.30/mile for hazmat
+    team_driver_multiplier: 1.40 # 40% more for team
+
+  # Lane-specific minimum rates (override global minimum)
+  lane_minimums:
+    - origin_state: "TX"
+      destination_state: "CA"
+      min_rpm: 2.25
+    - origin_state: "CA"
+      destination_state: "TX"
+      min_rpm: 2.10
+
+# ============================================================================
+# Deadhead Configuration
+# ============================================================================
+
+deadhead:
+  # Maximum acceptable deadhead
+  max_percentage: 15           # Maximum 15% deadhead
+  max_miles: 100               # Maximum 100 deadhead miles
+
+  # Deadhead cost calculation
+  cost_per_mile: 1.50          # Cost to drive empty mile
+
+  # When to accept higher deadhead
+  exceptions:
+    high_value_threshold: 2000  # Accept more deadhead if load > $2000
+    high_rpm_threshold: 3.00    # Accept more deadhead if RPM > $3.00
+    return_to_base: true        # Accept more deadhead when heading home
+
+# ============================================================================
+# Operating Costs
+# ============================================================================
+
+costs:
+  # Per-mile costs
+  fuel_per_mile: 0.60          # Average fuel cost per mile
+  maintenance_per_mile: 0.15   # Maintenance and repairs
+  tires_per_mile: 0.05         # Tire replacement reserve
+  insurance_per_mile: 0.12     # Insurance cost
+  depreciation_per_mile: 0.20  # Equipment depreciation
+
+  # Fixed monthly costs
+  monthly:
+    insurance: 2500
+    truck_payment: 3000
+    trailer_payment: 800
+    permits: 300
+    administrative: 500
+
+  # Total cost per mile calculation
+  total_cost_per_mile: 1.50    # Sum of all per-mile costs
+
+  # Driver compensation
+  driver_pay:
+    percentage: 0.70           # 70% of gross to owner-operator
+    per_mile_rate: 0.50        # Alternative: per-mile rate
+    detention_per_hour: 25.00  # Detention pay
+    layover_per_day: 100.00    # Layover pay
+
+# ============================================================================
+# Load Acceptance Criteria
+# ============================================================================
+
+acceptance_criteria:
+  # Automatic acceptance thresholds
+  auto_accept:
+    enabled: false             # Require human approval for now
+    min_rpm: 3.00             # Auto-accept if RPM >= $3.00
+    max_deadhead_pct: 5       # And deadhead <= 5%
+    min_confidence: 0.90      # And AI confidence >= 90%
+
+  # Automatic rejection thresholds
+  auto_reject:
+    enabled: true
+    max_deadhead_pct: 25      # Reject if deadhead > 25%
+    min_rpm: 1.50             # Or RPM < $1.50
+    blacklisted_brokers: []   # List of broker MC numbers to avoid
+
+  # Preferred characteristics
+  preferences:
+    expedited_loads: true
+    weekend_availability: true
+    hazmat_certified: false
+
+  # Geographic preferences
+  preferred_states:
+    - "TX"
+    - "OK"
+    - "LA"
+    - "AR"
+    - "NM"
+
+  avoid_states:
+    - "NY"  # High tolls, traffic
+    - "NJ"  # Congestion
+
+# ============================================================================
+# Route Optimization
+# ============================================================================
+
+routing:
+  # Route calculation preferences
+  preferences:
+    avoid_tolls: false         # Don't avoid tolls by default
+    prefer_highways: true      # Prefer interstate highways
+    avoid_urban: false         # Don't avoid cities
+
+  # Time calculations
+  average_speed:
+    highway: 60                # Average highway speed (mph)
+    city: 35                   # Average city speed (mph)
+
+  # Hours of service
+  hos_limits:
+    max_daily_drive_hours: 11  # Max driving hours per day
+    max_daily_total_hours: 14  # Max on-duty hours per day
+    required_rest_hours: 10    # Required rest period
+
+  # Loading/unloading time estimates
+  dwell_time:
+    pickup_minutes: 60         # Average pickup time
+    delivery_minutes: 45       # Average delivery time
+
+# ============================================================================
+# IFTA and Compliance
+# ============================================================================
+
+compliance:
+  # IFTA tracking
+  ifta:
+    enabled: true
+    track_by_jurisdiction: true
+    quarterly_reports: true
+
+  # Fuel tax rates by state (example - update quarterly)
+  fuel_tax_rates:
+    TX: 0.20
+    OK: 0.20
+    LA: 0.20
+    AR: 0.245
+    NM: 0.1875
+    CA: 0.511
+
+  # HOS compliance
+  hos:
+    enforce_limits: true
+    warning_threshold: 0.90    # Warn at 90% of limit
+
+  # Weight and permit compliance
+  permits:
+    max_gvwr: 26000           # Maximum GVWR (hotshot typical)
+    overweight_threshold: 0.95 # Warn at 95% of limit
+
+# ============================================================================
+# Agent Configuration
+# ============================================================================
+
+agents:
+  # Dispatch agent
+  dispatch:
+    enabled: true
+    check_interval_minutes: 15  # Check load boards every 15 min
+    max_loads_per_check: 50     # Analyze top 50 loads
+    notification_threshold: 2.50 # Notify if RPM >= $2.50
+
+  # Rate analysis agent
+  rate_analysis:
+    enabled: true
+    historical_days: 90        # Analyze last 90 days
+    update_interval_hours: 6   # Update rate data every 6 hours
+
+  # Compliance agent
+  compliance_agent:
+    enabled: true
+    daily_check: true
+    hos_monitoring: true
+    ifta_tracking: true
+
+  # Route optimizer
+  route_optimizer:
+    enabled: true
+    consider_fuel_prices: true
+    consider_traffic: true
+    backhaul_search_radius: 150  # Search 150 miles for backhaul
+
+# ============================================================================
+# Load Board Configuration
+# ============================================================================
+
+load_boards:
+  # DAT Load Board
+  dat:
+    enabled: true
+    priority: 1               # Check DAT first
+    cache_minutes: 5          # Cache results for 5 minutes
+    max_results: 100
+
+  # Truckstop.com
+  truckstop:
+    enabled: true
+    priority: 2
+    cache_minutes: 5
+    max_results: 100
+
+  # Search preferences
+  search:
+    radius_miles: 150         # Search within 150 miles of current location
+    max_age_hours: 24         # Only show loads posted in last 24 hours
+    include_partial: false    # Don't include partial loads
+
+# ============================================================================
+# Notifications
+# ============================================================================
+
+notifications:
+  # Email notifications
+  email:
+    enabled: true
+    high_value_loads: true    # Email for high-value loads
+    compliance_alerts: true
+    settlement_reports: true
+
+  # SMS notifications
+  sms:
+    enabled: true
+    urgent_only: true         # Only urgent notifications
+
+  # Slack notifications
+  slack:
+    enabled: false
+    channel: "#freight-ops"
+
+  # Notification thresholds
+  thresholds:
+    high_value_load: 2000     # Notify if load value > $2000
+    excellent_rpm: 3.00       # Notify if RPM > $3.00
+    hos_warning_hours: 1      # Notify 1 hour before HOS limit
+
+# ============================================================================
+# Data and Caching
+# ============================================================================
+
+data:
+  # Cache settings
+  cache:
+    enabled: true
+    ttl_seconds: 300          # 5 minute default TTL
+    redis_enabled: true
+
+  # Data retention
+  retention:
+    load_history_days: 365    # Keep load history for 1 year
+    rate_history_days: 730    # Keep rate data for 2 years
+    compliance_records_years: 7  # Keep compliance records for 7 years
+
+  # Database
+  database:
+    pool_size: 20
+    max_overflow: 10
+    pool_timeout: 30
+
+# ============================================================================
+# API Rate Limiting
+# ============================================================================
+
+rate_limiting:
+  # External API rate limits
+  dat_api:
+    requests_per_minute: 60
+    requests_per_hour: 1000
+
+  truckstop_api:
+    requests_per_minute: 30
+    requests_per_hour: 500
+
+  google_maps_api:
+    requests_per_day: 2500
+
+  # Retry configuration
+  retry:
+    max_attempts: 3
+    backoff_factor: 2
+    max_wait_seconds: 60
+
+# ============================================================================
+# Logging
+# ============================================================================
+
+logging:
+  level: "INFO"               # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "json"              # json or text
+
+  # Log specific events
+  log_decisions: true         # Log all agent decisions
+  log_api_calls: true         # Log external API calls
+  log_rate_analysis: true     # Log rate calculations
+
+  # Log retention
+  retention_days: 90
+
+  # Sensitive data
+  mask_api_keys: true
+  mask_financial_data: false
+
+# ============================================================================
+# Feature Flags
+# ============================================================================
+
+features:
+  auto_booking: false         # Automatically book loads
+  predictive_rates: true      # Use ML for rate prediction
+  real_time_tracking: true    # Enable GPS tracking integration
+  auto_settlements: false     # Automatically calculate settlements
+  blockchain_tracking: false  # Experimental blockchain integration
+  multi_agent_coordination: true  # Enable agent collaboration
