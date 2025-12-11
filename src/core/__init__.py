@@ -7,4 +7,6 @@ This module provides:
 - Config: Configuration management
 """
 
-__all__ = []
+from .config import ConfigManager, get_config
+
+__all__ = ["ConfigManager", "get_config"]

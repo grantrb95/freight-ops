@@ -9,9 +9,19 @@ This module contains specialized agents for:
 - Settlement: Driver pay calculations
 """
 
-from typing import TYPE_CHECKING
+from .base import AgentDecision, BaseAgent
+from .compliance import ComplianceAgent
+from .dispatch import DispatchAgent
+from .rate_analysis import RateAnalysisAgent
+from .route_optimizer import RouteOptimizerAgent
+from .settlement import SettlementAgent
 
-if TYPE_CHECKING:
-    from .base import BaseAgent
-
-__all__ = ["BaseAgent"]
+__all__ = [
+    "BaseAgent",
+    "AgentDecision",
+    "DispatchAgent",
+    "RateAnalysisAgent",
+    "ComplianceAgent",
+    "RouteOptimizerAgent",
+    "SettlementAgent",
+]
