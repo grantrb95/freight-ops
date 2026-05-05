@@ -222,6 +222,27 @@ Net Pay = Gross Pay - Advances - Fuel - Deductions + Reimbursements
 5. Document API endpoints used
 6. Add integration tests
 
+### Debugging MCP Servers with the Inspector
+
+[MCP Inspector](https://github.com/modelcontextprotocol/inspector) is an
+interactive UI for stepping through an MCP server's tools, resources, and
+prompts over stdio. The `scripts/mcp_inspector.sh` wrapper launches it
+against this project's servers:
+
+```bash
+# Inspect one of the built-in servers
+scripts/mcp_inspector.sh truckstop
+scripts/mcp_inspector.sh dat
+scripts/mcp_inspector.sh fuel
+
+# Inspect any other stdio MCP server
+scripts/mcp_inspector.sh -- uv run python -m mcp_servers.custom
+```
+
+Requires Node.js (for `npx`) and the project's `uv` environment. The
+inspector is fetched on demand via `npx --yes`, so no global install is
+needed.
+
 ### Data Models
 
 Use Pydantic for all data structures:
