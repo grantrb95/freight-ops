@@ -73,46 +73,41 @@ load_boards:
     enabled: true
     search_radius_miles: 250
 
+# Maintenance Tracking
+maintenance:
+  # Flag a service as "due soon" when within either threshold.
+  due_soon_miles: 500
+  due_soon_days: 14
+  # Recurring service intervals per equipment category.
+  # Each item must define at least one of: miles, months.
+  schedules:
+    truck:
+      - type: oil_change
+        miles: 7500
+        months: 6
+      - type: tire_rotation
+        miles: 7500
+      - type: fuel_filter
+        miles: 15000
+      - type: air_filter
+        miles: 15000
+      - type: transmission_service
+        miles: 60000
+      - type: coolant_flush
+        months: 60
+      - type: dot_inspection
+        months: 12
+    trailer:
+      - type: wheel_bearing
+        miles: 12000
+        months: 12
+      - type: brake_service
+        miles: 24000
+      - type: tire_replacement
+        months: 72
+      - type: dot_inspection
+        months: 12
+
 # Logging
 logging:
   level: "INFO"
-```
-
-Save the file (Ctrl+S).
-
----
-
-**Step 3: Create the .env file**
-```
-code .env
-```
-
-Paste this content:
-```
-# H-4 Strategic Solutions LLC - Environment Configuration
-# KEEP THIS FILE SECRET - Never commit to Git
-
-# LLM Provider API Keys
-ANTHROPIC_API_KEY=your-key-here
-OPENAI_API_KEY=your-key-here
-
-# Google Maps API
-GOOGLE_MAPS_API_KEY=your-key-here
-
-# Load Board APIs
-DAT_API_KEY=
-TRUCKSTOP_API_KEY=
-
-# Database
-DATABASE_URL=sqlite:///./freight_ops.db
-```
-
-Save the file (Ctrl+S).
-
----
-
-**Step 4: Commit the config changes**
-```
-git add config/config.yaml
-git commit -m "Add H-4 Strategic Solutions business configuration"
-git push
