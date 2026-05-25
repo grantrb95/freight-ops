@@ -9,9 +9,11 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from datetime import datetime
-from typing import Any, Optional
+from pathlib import Path
+from typing import Any, Optional, Union
 
 from src.agents.base import BaseAgent
+from src.core.config import DEFAULT_CONFIG_PATH, load_config, load_maintenance_schedules
 from src.data.models.maintenance import (
     MaintenanceAlert,
     MaintenanceSchedule,
@@ -63,6 +65,17 @@ class MaintenanceAgent(BaseAgent):
     ) -> None:
         super().__init__("maintenance", config)
         self.schedules: list[MaintenanceSchedule] = list(schedules or [])
+
+    @classmethod
+    def from_config(
+        cls,
+        path: Union[str, Path] = DEFAULT_CONFIG_PATH,
+        config: Optional[dict[str, Any]] = None,
+    ) -> "MaintenanceAgent":
+        """Build an agent with schedules loaded from configuration."""
+        loaded = config if config is not None else load_config(path)
+        schedules = load_maintenance_schedules(loaded)
+        return cls(schedules=schedules, config=loaded)
 
     def evaluate_fleet(
         self,

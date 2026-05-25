@@ -7,4 +7,6 @@ This module provides:
 - Config: Configuration management
 """
 
-__all__ = []
+from .config import load_config, load_maintenance_schedules
+
+__all__ = ["load_config", "load_maintenance_schedules"]
