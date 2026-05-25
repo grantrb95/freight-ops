@@ -12,6 +12,7 @@ This module contains specialized agents for:
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .base import BaseAgent
+    from .base import AgentDecision, BaseAgent
+    from .maintenance import MaintenanceAgent
 
-__all__ = ["BaseAgent"]
+__all__ = ["AgentDecision", "BaseAgent", "MaintenanceAgent"]

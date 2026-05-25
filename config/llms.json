@@ -215,6 +215,28 @@
       ]
     },
 
+    "maintenance": {
+      "primary_model": {
+        "provider": "anthropic",
+        "model": "claude-3-5-haiku-20241022",
+        "temperature": 0.0,
+        "max_tokens": 2048
+      },
+      "fallback_model": {
+        "provider": "openai",
+        "model": "gpt-4o",
+        "temperature": 0.0,
+        "max_tokens": 2048
+      },
+      "reasoning": "Maintenance tracking is rule-based and recurring: it evaluates service intervals against odometer readings and dates. A fast, low-cost model at zero temperature keeps scheduling deterministic and inexpensive while still summarizing fleet status clearly.",
+      "system_prompt_template": "You are a fleet maintenance specialist for hotshot trucking. Track preventive maintenance schedules for the truck and trailer, evaluate service intervals against current odometer and date, and flag any service that is due soon or overdue. Prioritize safety-critical and DOT-required items.",
+      "tools_enabled": [
+        "maintenance_scheduler",
+        "alert_system",
+        "notification_service"
+      ]
+    },
+
     "general_query": {
       "primary_model": {
         "provider": "anthropic",

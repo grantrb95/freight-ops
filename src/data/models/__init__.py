@@ -8,6 +8,30 @@ Core models:
 - Driver: Driver and equipment information
 - Expense: Cost tracking
 - Settlement: Driver pay calculations
+- Maintenance: Vehicle/equipment service tracking
 """
 
-__all__ = []
+from .load import Load, LoadStatus, LoadType, Location
+from .maintenance import (
+    EquipmentCategory,
+    MaintenanceAlert,
+    MaintenanceRecord,
+    MaintenanceSchedule,
+    MaintenanceStatus,
+    MaintenanceType,
+    ServiceInterval,
+)
+
+__all__ = [
+    "Load",
+    "LoadStatus",
+    "LoadType",
+    "Location",
+    "EquipmentCategory",
+    "MaintenanceAlert",
+    "MaintenanceRecord",
+    "MaintenanceSchedule",
+    "MaintenanceStatus",
+    "MaintenanceType",
+    "ServiceInterval",
+]

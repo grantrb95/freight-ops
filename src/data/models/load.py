@@ -106,13 +106,13 @@ class Load(BaseModel):
     # Notes
     notes: Optional[str] = Field(None, description="Additional load details")
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def total_miles(self) -> int:
         """Total miles including deadhead."""
         return self.loaded_miles + self.deadhead_miles
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def deadhead_percentage(self) -> float:
         """Deadhead as percentage of total miles."""
@@ -120,13 +120,13 @@ class Load(BaseModel):
             return 0.0
         return (self.deadhead_miles / self.total_miles) * 100
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def gross_revenue(self) -> Decimal:
         """Total revenue including all charges."""
         return self.rate + self.fuel_surcharge + self.additional_charges
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def rate_per_mile(self) -> Decimal:
         """Rate per loaded mile."""
@@ -134,7 +134,7 @@ class Load(BaseModel):
             return Decimal("0")
         return self.gross_revenue / Decimal(self.loaded_miles)
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def all_miles_rate(self) -> Decimal:
         """Rate per mile including deadhead."""
@@ -142,7 +142,7 @@ class Load(BaseModel):
             return Decimal("0")
         return self.gross_revenue / Decimal(self.total_miles)
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def trip_duration_hours(self) -> float:
         """Estimated trip duration in hours."""
