@@ -111,6 +111,8 @@ class MaintenanceAgent(BaseAgent):
                 next_due_odometer=schedule.next_due_odometer,
                 next_due_date=schedule.next_due_date,
                 message=_build_message(schedule, status, miles_remaining, days_remaining),
+                verification_status=schedule.last_service_verification,
+                warranty_critical=schedule.warranty_critical,
             )
             alerts.append(alert)
 

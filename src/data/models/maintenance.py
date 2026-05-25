@@ -51,6 +51,14 @@ class MaintenanceStatus(str, Enum):
     OVERDUE = "overdue"
 
 
+class VerificationStatus(str, Enum):
+    """Confidence in a service record's accuracy."""
+
+    VERIFIED = "verified"  # Confirmed against documentation (receipt, work order)
+    PROVISIONAL = "provisional"  # Seeded from recollection, pending verification
+    UNVERIFIED = "unverified"  # No record on file
+
+
 class ServiceInterval(BaseModel):
     """
     Recurrence interval for a maintenance item.
@@ -85,6 +93,10 @@ class MaintenanceRecord(BaseModel):
     vendor: Optional[str] = Field(None, description="Shop or vendor that performed the service")
     description: Optional[str] = Field(None, description="Short description of work done")
     notes: Optional[str] = Field(None, description="Additional notes")
+    verification_status: VerificationStatus = Field(
+        VerificationStatus.UNVERIFIED,
+        description="Whether this record has been verified against documentation",
+    )
 
     class Config:
         """Pydantic configuration."""
@@ -121,6 +133,15 @@ class MaintenanceSchedule(BaseModel):
     )
     due_soon_days: int = Field(
         14, ge=0, description="Flag as due-soon when within this many days"
+    )
+
+    last_service_verification: VerificationStatus = Field(
+        VerificationStatus.UNVERIFIED,
+        description="Verification status of the baseline (last) service",
+    )
+    warranty_critical: bool = Field(
+        False,
+        description="Service must be dealer-performed to preserve factory warranty",
     )
 
     @computed_field  # type: ignore[prop-decorator]
@@ -193,6 +214,7 @@ class MaintenanceSchedule(BaseModel):
         """Update the schedule's baseline from a completed service record."""
         self.last_service_date = record.service_date
         self.last_service_odometer = record.odometer
+        self.last_service_verification = record.verification_status
 
     class Config:
         """Pydantic configuration."""
@@ -215,6 +237,30 @@ class MaintenanceAlert(BaseModel):
     next_due_odometer: Optional[int] = None
     next_due_date: Optional[datetime] = None
     message: str
+    verification_status: VerificationStatus = VerificationStatus.UNVERIFIED
+    warranty_critical: bool = False
+
+    class Config:
+        """Pydantic configuration."""
+
+        json_encoders = {datetime: lambda v: v.isoformat()}
+
+
+class OdometerReading(BaseModel):
+    """A current odometer reading with provenance, for staleness checks."""
+
+    unit_id: str = Field(..., description="Equipment unit this reading applies to")
+    miles: int = Field(..., ge=0, description="Current odometer / hub miles")
+    last_verified_date: Optional[datetime] = Field(
+        None, description="When this reading was last verified against its source"
+    )
+    source: Optional[str] = Field(None, description="Where the reading came from (e.g. ELD)")
+
+    def is_stale(self, as_of: datetime, max_age_days: int = 7) -> bool:
+        """True when the reading has not been verified within ``max_age_days``."""
+        if self.last_verified_date is None:
+            return True
+        return (as_of - self.last_verified_date).days > max_age_days
 
     class Config:
         """Pydantic configuration."""
