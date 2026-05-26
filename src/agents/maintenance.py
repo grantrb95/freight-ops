@@ -32,7 +32,11 @@ def _build_message(schedule: MaintenanceSchedule, status: MaintenanceStatus,
                    miles_remaining: Optional[int], days_remaining: Optional[int]) -> str:
     """Compose a human-readable alert message."""
     service = schedule.maintenance_type.value.replace("_", " ")
-    unit = f"{schedule.unit_id} ({schedule.equipment.value})"
+    # Avoid "truck (truck)" when the unit_id already is the equipment category.
+    if schedule.unit_id == schedule.equipment.value:
+        unit = schedule.unit_id
+    else:
+        unit = f"{schedule.unit_id} ({schedule.equipment.value})"
 
     if status is MaintenanceStatus.OVERDUE:
         parts = []

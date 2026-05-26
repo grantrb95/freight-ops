@@ -41,6 +41,15 @@ _STATUS_HEADINGS = [
     (MaintenanceStatus.OK, "OK"),
 ]
 
+# Recommended-action buckets, in the order they should be acted on. Keys are
+# stable for machine consumers (e.g. the Control Tower dashboard).
+_RECOMMENDATION_GROUPS = [
+    ("dealer_warranty", "Dealer service this week - preserves factory warranty"),
+    ("overdue", "Service this week - overdue"),
+    ("schedule_soon", "Schedule soon"),
+    ("log_first_service", "Log first service - no record on file"),
+]
+
 
 @dataclass
 class MaintenanceReport:
@@ -121,6 +130,35 @@ def _markers(alert: MaintenanceAlert) -> str:
     return ("  " + " ".join(tags)) if tags else ""
 
 
+def _has_baseline(alert: MaintenanceAlert) -> bool:
+    return alert.miles_remaining is not None or alert.days_remaining is not None
+
+
+def _recommendation_key(alert: MaintenanceAlert) -> Optional[str]:
+    """Which action bucket an alert falls into, or None if no action is needed."""
+    if alert.status is MaintenanceStatus.OK:
+        return None
+    if alert.warranty_critical:
+        return "dealer_warranty"
+    if alert.status is MaintenanceStatus.OVERDUE:
+        return "overdue"
+    return "schedule_soon" if _has_baseline(alert) else "log_first_service"
+
+
+def group_recommendations(alerts: list[MaintenanceAlert]) -> dict[str, list[MaintenanceAlert]]:
+    """Bucket non-OK alerts into ordered action groups (all keys always present)."""
+    groups: dict[str, list[MaintenanceAlert]] = {key: [] for key, _ in _RECOMMENDATION_GROUPS}
+    for alert in alerts:
+        key = _recommendation_key(alert)
+        if key is not None:
+            groups[key].append(alert)
+    return groups
+
+
+def _action_item(alert: MaintenanceAlert) -> str:
+    return f"{alert.unit_id} {_service_name(alert)} ({_detail(alert)})"
+
+
 def render_text(report: MaintenanceReport) -> str:
     """Render a scannable plain-text report."""
     lines: list[str] = []
@@ -167,20 +205,20 @@ def render_text(report: MaintenanceReport) -> str:
                 f"{_detail(alert):<22}{_markers(alert)}"
             )
 
-    # Warranty-critical items needing service, called out separately.
-    warranty_due = [
-        a
-        for a in report.alerts
-        if a.warranty_critical and a.status is not MaintenanceStatus.OK
-    ]
-    if warranty_due:
+    # Recommended actions: what to DO, grouped and ordered by urgency. The
+    # dealer/warranty bucket leads so warranty-critical work is unmissable.
+    grouped = group_recommendations(report.alerts)
+    if any(grouped[key] for key, _ in _RECOMMENDATION_GROUPS):
         lines.append("")
         lines.append("-" * 70)
-        lines.append(" WARRANTY-CRITICAL - dealer service required to preserve factory warranty:")
-        for alert in warranty_due:
-            lines.append(
-                f"   {alert.unit_id:<8} {_service_name(alert):<20} {alert.status.value.upper()}"
-            )
+        lines.append(" RECOMMENDED ACTIONS")
+        for key, heading in _RECOMMENDATION_GROUPS:
+            bucket = grouped[key]
+            if not bucket:
+                continue
+            lines.append(f"   {heading}:")
+            for alert in bucket:
+                lines.append(f"     {_action_item(alert)}")
 
     # Legend (only when relevant).
     if any(a.verification_status is VerificationStatus.PROVISIONAL for a in report.alerts):
@@ -208,6 +246,18 @@ def render_json(report: MaintenanceReport) -> str:
                 for a in report.alerts
                 if a.warranty_critical and a.status is not MaintenanceStatus.OK
             ),
+        },
+        "recommendations": {
+            key: [
+                {
+                    "unit_id": alert.unit_id,
+                    "maintenance_type": alert.maintenance_type.value,
+                    "status": alert.status.value,
+                    "detail": _detail(alert),
+                }
+                for alert in bucket
+            ]
+            for key, bucket in group_recommendations(report.alerts).items()
         },
         "alerts": [alert.model_dump(mode="json") for alert in report.alerts],
     }

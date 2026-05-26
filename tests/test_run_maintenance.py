@@ -8,6 +8,7 @@ import pytest
 
 from scripts.run_maintenance import (
     build_report,
+    group_recommendations,
     main,
     render_json,
     render_text,
@@ -101,11 +102,53 @@ class TestRenderText:
         text = render_text(build_report(config, AS_OF))
         assert "[?]" in text
         assert "[warranty: dealer]" in text
-        assert "WARRANTY-CRITICAL" in text
+
+    def test_recommended_actions_block(self, config: dict) -> None:
+        text = render_text(build_report(config, AS_OF))
+        assert "RECOMMENDED ACTIONS" in text
+        assert "Dealer service this week - preserves factory warranty" in text
+        # An actionable line names the unit + service.
+        assert "truck fuel filter" in text
+
+    def test_message_has_no_doubled_category(self, config: dict) -> None:
+        report = build_report(config, AS_OF)
+        oil = _alert(report.alerts, "truck", MaintenanceType.OIL_CHANGE)
+        assert "(truck)" not in oil.message
+        assert oil.message == "OVERDUE: oil change on truck (8163 mi past due)"
 
     def test_no_trailing_whitespace(self, config: dict) -> None:
         text = render_text(build_report(config, AS_OF))
         assert all(line == line.rstrip() for line in text.splitlines())
+
+
+@pytest.mark.unit
+class TestRecommendations:
+    def test_buckets(self, config: dict) -> None:
+        groups = group_recommendations(build_report(config, AS_OF).alerts)
+
+        def types(key: str) -> set[MaintenanceType]:
+            return {a.maintenance_type for a in groups[key]}
+
+        # Warranty-critical items (any non-OK status) go to the dealer.
+        assert types("dealer_warranty") == {
+            MaintenanceType.FUEL_FILTER,
+            MaintenanceType.COOLANT_FLUSH,
+            MaintenanceType.TRANSMISSION_SERVICE,
+        }
+        # Non-warranty overdue items are urgent.
+        assert types("overdue") == {MaintenanceType.OIL_CHANGE, MaintenanceType.TIRE_ROTATION}
+        # Non-warranty, never-serviced items: establish a baseline.
+        assert MaintenanceType.AIR_FILTER in types("log_first_service")
+        assert MaintenanceType.WHEEL_BEARING in types("log_first_service")
+
+    def test_all_keys_present(self, config: dict) -> None:
+        groups = group_recommendations(build_report(config, AS_OF).alerts)
+        assert set(groups) == {"dealer_warranty", "overdue", "schedule_soon", "log_first_service"}
+
+    def test_ok_items_excluded(self, config: dict) -> None:
+        groups = group_recommendations(build_report(config, AS_OF).alerts)
+        flagged = sum(len(v) for v in groups.values())
+        assert flagged == 9  # 11 schedules - 2 OK (dot inspections)
 
 
 @pytest.mark.unit
@@ -119,6 +162,13 @@ class TestRenderJson:
             "warranty_critical_due": 3,
         }
         assert len(payload["alerts"]) == 11
+
+    def test_recommendations_present_and_stable(self, config: dict) -> None:
+        payload = json.loads(render_json(build_report(config, AS_OF)))
+        recs = payload["recommendations"]
+        assert set(recs) == {"dealer_warranty", "overdue", "schedule_soon", "log_first_service"}
+        dealer_types = {item["maintenance_type"] for item in recs["dealer_warranty"]}
+        assert dealer_types == {"fuel_filter", "coolant_flush", "transmission_service"}
 
 
 @pytest.mark.unit
