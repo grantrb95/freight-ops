@@ -149,7 +149,7 @@ class TestLoadServiceHistory:
 class TestLoadOdometers:
     def test_truck_reading(self) -> None:
         readings = load_odometers(path=CONFIG_PATH)
-        assert readings["truck"].miles == 29503
+        assert readings["truck"].miles == 30100
         assert readings["truck"].source == "Motive ELD"
         assert readings["truck"].last_verified_date is not None
 

@@ -22,7 +22,7 @@ from src.data.models.maintenance import (
 )
 
 CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "config.yaml"
-AS_OF = datetime(2026, 5, 25)
+AS_OF = datetime(2026, 5, 27)
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def _alert(alerts: list[MaintenanceAlert], unit: str, mtype: MaintenanceType) ->
 
 @pytest.mark.unit
 class TestGroundTruth:
-    """The seed data + 29,503 mi odometer MUST produce these three overdue items."""
+    """The seed data + 30,100 mi odometer MUST produce these three overdue items."""
 
     @pytest.mark.parametrize(
         "mtype",
@@ -49,10 +49,10 @@ class TestGroundTruth:
 
     def test_overdue_mileage_amounts(self, config: dict) -> None:
         report = build_report(config, AS_OF)
-        # Current odometer 29,503; last-service odometers from the seed history.
-        assert _alert(report.alerts, "truck", MaintenanceType.OIL_CHANGE).miles_remaining == -8163
-        assert _alert(report.alerts, "truck", MaintenanceType.FUEL_FILTER).miles_remaining == -6442
-        assert _alert(report.alerts, "truck", MaintenanceType.TIRE_ROTATION).miles_remaining == -11286
+        # Current odometer 30,100; last-service odometers from the seed history.
+        assert _alert(report.alerts, "truck", MaintenanceType.OIL_CHANGE).miles_remaining == -8760
+        assert _alert(report.alerts, "truck", MaintenanceType.FUEL_FILTER).miles_remaining == -7039
+        assert _alert(report.alerts, "truck", MaintenanceType.TIRE_ROTATION).miles_remaining == -11883
 
 
 @pytest.mark.unit
@@ -85,7 +85,7 @@ class TestStaleOdometer:
         assert report.stale_units == []
 
     def test_stale_after_threshold(self, config: dict) -> None:
-        report = build_report(config, datetime(2026, 6, 10))  # 16 days later
+        report = build_report(config, datetime(2026, 6, 10))  # 14 days later
         assert "truck" in report.stale_units
         assert "STALE" in render_text(report)
 
@@ -114,7 +114,7 @@ class TestRenderText:
         report = build_report(config, AS_OF)
         oil = _alert(report.alerts, "truck", MaintenanceType.OIL_CHANGE)
         assert "(truck)" not in oil.message
-        assert oil.message == "OVERDUE: oil change on truck (8163 mi past due)"
+        assert oil.message == "OVERDUE: oil change on truck (8760 mi past due)"
 
     def test_no_trailing_whitespace(self, config: dict) -> None:
         text = render_text(build_report(config, AS_OF))
@@ -174,12 +174,12 @@ class TestRenderJson:
 @pytest.mark.unit
 class TestMain:
     def test_json_format_exits_zero(self, capsys: pytest.CaptureFixture[str]) -> None:
-        rc = main(["--config", str(CONFIG_PATH), "--as-of", "2026-05-25", "--format", "json"])
+        rc = main(["--config", str(CONFIG_PATH), "--as-of", "2026-05-27", "--format", "json"])
         assert rc == 0
         payload = json.loads(capsys.readouterr().out)
         assert payload["summary"]["overdue"] == 3
 
     def test_text_format_exits_zero(self, capsys: pytest.CaptureFixture[str]) -> None:
-        rc = main(["--config", str(CONFIG_PATH), "--as-of", "2026-05-25"])
+        rc = main(["--config", str(CONFIG_PATH), "--as-of", "2026-05-27"])
         assert rc == 0
         assert "Fleet Maintenance Report" in capsys.readouterr().out

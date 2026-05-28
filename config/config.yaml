@@ -28,18 +28,20 @@ equipment:
 
   trailer:
     type: "gooseneck"
-    subtype: "flatbed"
+    subtype: "dovetail"
     make: "MAXX-D"
     model: "YHX"  # 40-ft hydraulic dovetail gooseneck, air-ride, tandem axle, hydraulic brakes
     length_ft: 40
     max_weight_lbs: 16500
+    accessories:
+      - "winch"
 
 # Current odometer / hub-mile readings, with provenance for staleness checks.
 # A reading older than 7 days triggers a warning in the maintenance report.
 odometers:
   truck:
-    miles: 29503
-    last_verified_date: "2026-05-25"
+    miles: 30100
+    last_verified_date: "2026-05-27"
     source: "Motive ELD"
   # The gooseneck has no independent hub odometer; its mileage tracks the truck
   # while coupled. Mileage-based trailer items are evaluated from in-service date.
