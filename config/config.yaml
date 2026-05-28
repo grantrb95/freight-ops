@@ -28,12 +28,16 @@ equipment:
 
   trailer:
     type: "gooseneck"
-    subtype: "dovetail"
+    subtype: "flatbed"
     make: "MAXX-D"
-    model: "YHX"  # 40-ft hydraulic dovetail gooseneck, air-ride, tandem axle, hydraulic brakes
+    model: "YHX"  # 40-ft hydraulic dovetail gooseneck, tandem axle, hydraulic brakes
     length_ft: 40
     max_weight_lbs: 16500
-    accessories:
+    suspension: "air_ride"
+    # Deck features (capabilities, not type-level distinctions). Keep this list
+    # extensible so adding a step-deck or lowboy later doesn't force a refactor.
+    features:
+      - "dovetail"
       - "winch"
 
 # Current odometer / hub-mile readings, with provenance for staleness checks.
