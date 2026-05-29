@@ -22,14 +22,33 @@ equipment:
     year: 2025
     make: "Dodge"
     model: "Ram 3500"
+    engine: "6.7L Cummins HO turbo-diesel"  # 420 hp / 1,075 lb-ft, severe-duty schedule
     mpg: 9
     fuel_tank_gallons: 32
-    
+
   trailer:
     type: "gooseneck"
     subtype: "flatbed"
+    make: "MAXX-D"
+    model: "YHX"  # 40-ft hydraulic dovetail gooseneck, tandem axle, hydraulic brakes
     length_ft: 40
     max_weight_lbs: 16500
+    suspension: "air_ride"
+    # Deck features (capabilities, not type-level distinctions). Keep this list
+    # extensible so adding a step-deck or lowboy later doesn't force a refactor.
+    features:
+      - "dovetail"
+      - "winch"
+
+# Current odometer / hub-mile readings, with provenance for staleness checks.
+# A reading older than 7 days triggers a warning in the maintenance report.
+odometers:
+  truck:
+    miles: 30100
+    last_verified_date: "2026-05-27"
+    source: "Motive ELD"
+  # The gooseneck has no independent hub odometer; its mileage tracks the truck
+  # while coupled. Mileage-based trailer items are evaluated from in-service date.
 
 # Operating Costs
 costs:
@@ -78,6 +97,13 @@ maintenance:
   # Flag a service as "due soon" when within either threshold.
   due_soon_miles: 500
   due_soon_days: 14
+  # Services that must be dealer-performed to preserve the factory powertrain /
+  # emissions warranty on the 6.7L Cummins. Edit as warranty terms dictate.
+  warranty_critical:
+    - fuel_filter        # Cummins fuel/emissions system
+    - coolant_flush      # powertrain cooling
+    - transmission_service  # powertrain
+    - def_system         # emissions (SCR/DEF)
   # Recurring service intervals per equipment category.
   # Each item must define at least one of: miles, months.
   schedules:
@@ -107,6 +133,34 @@ maintenance:
         months: 72
       - type: dot_inspection
         months: 12
+  # Completed-service seed. PROVISIONAL until verified against paperwork
+  # (pending Matt verification). Set `verification: verified` once confirmed.
+  service_history:
+    # --- Truck (2025 Ram 3500) ---
+    - unit: truck
+      type: dot_inspection
+      date: "2026-01-11"
+      odometer: 0
+    - unit: truck
+      type: fuel_filter
+      date: "2026-02-21"
+      odometer: 8061
+      description: "Both fuel filters replaced"
+    - unit: truck
+      type: tire_rotation
+      date: "2026-03-07"
+      odometer: 10717
+      vendor: "FTG Tire and Wheel"
+    - unit: truck
+      type: oil_change
+      date: "2026-03-15"
+      odometer: 13840
+    # --- Trailer (MAXX-D YHX) ---
+    - unit: trailer
+      type: dot_inspection
+      date: "2026-01-11"
+      odometer: 0
+    # No other trailer service performed yet; first intervals run from in-service date.
 
 # Logging
 logging:
