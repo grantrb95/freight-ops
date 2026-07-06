@@ -234,7 +234,7 @@ Reference `config/llms.json` for agent-specific models:
 - Lighter loads (typically Class 3-5 trucks)
 - Focus on speed and flexibility over maximum payload
 - H-4 equipment: 2025 Dodge Ram 3500, 40ft gooseneck flatbed
-- Max weight: 16,500 lbs
+- Max payload: 22,500 lbs (air-ride gooseneck — premium selling point for damage-sensitive freight)
 - Preferred operating area: OK, TX, AR, KS, MO, LA (1000 mile radius)
 
 ### Operating Costs (H-4 Configuration)
